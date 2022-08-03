@@ -47,6 +47,11 @@ def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
     resultado[new_column_name] = 0
     for index_codigo_cuenta, row in df.iterrows():
         saldo = row[new_column_name]
+        # Validar saldo es un número
+        try:
+            a = int(saldo)
+        except:
+            saldo = 0
         # resultado.at[index_codigo_cuenta, new_column_name] = saldo
         if (index_codigo_cuenta in resultado.index):
             actualizar_monto_recursivamente(resultado, index_codigo_cuenta, new_column_name, saldo)

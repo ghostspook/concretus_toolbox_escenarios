@@ -75,7 +75,10 @@ def computar_acumulado(ambiente: pandas.DataFrame, columna_escenario_inicial: st
     for index_codigo_cuenta, row in resultado.iterrows():
         valor_escenario_inicial = row[columna_escenario_inicial]
         neto_movimientos = row[columna_neto_movimientos]
-        resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos
+        if ((index_codigo_cuenta[0] == '4') | (index_codigo_cuenta[0] == '5')):
+            resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial - neto_movimientos
+        else:
+            resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos
     imprimir_columnas(resultado)
     return resultado
 def imprimir_columnas(df: pandas.DataFrame):

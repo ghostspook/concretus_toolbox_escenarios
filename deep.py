@@ -57,6 +57,11 @@ def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
             actualizar_monto_recursivamente(resultado, index_codigo_cuenta, new_column_name, saldo)
         else:
             print ('Código no consta en el plan de cuentas', index_codigo_cuenta, '. Monto: ', saldo)
+    total_ingresos = resultado.at['4', new_column_name] # (-)
+    total_gastos = resultado.at['5', new_column_name] # (+)
+    utilidad = total_ingresos + total_gastos
+    resultado.at['49', new_column_name] = utilidad
+    actualizar_monto_recursivamente(resultado, '3701', new_column_name, utilidad)
     imprimir_columnas(resultado)
     return resultado
 

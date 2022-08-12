@@ -1,4 +1,6 @@
+import anytree
 import pandas
+from anytree import Node, RenderTree
 
 def abrir_plan_cuentas(path_plan_de_cuentas: str):
     df = pandas.read_excel(path_plan_de_cuentas)
@@ -44,6 +46,53 @@ def cargar_escenario(ambiente: pandas.DataFrame, filename: str):
             print('Código no consta en el plan de cuentas', index_codigo_cuenta)
     imprimir_columnas(resultado)
     return resultado
+
+def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = False):
+    print("Validando escenario")
+    escenario_ok = True
+
+    root = obtener_arbol(ambiente)
+    if imprimir:
+        imprimir_arbol(ambiente, root, column_name)
+    result = True
+    for node in root.children:
+        result = validar_suma_hijos(node, ambiente, column_name=column_name)
+    return result
+
+def validar_suma_hijos(nodo_padre: anytree.Node, ambiente: pandas.DataFrame, column_name:str):
+    if len(nodo_padre.children) == 0:
+        return
+
+    valor = ambiente.at[nodo_padre.name, column_name]
+    suma = 0
+    for hijo in nodo_padre.children:
+        suma += ambiente.at[hijo.name, column_name]
+    diferencia = abs(suma - valor)
+    if diferencia > 0.01:
+        print("No coincide suma de %s (valor: %s, suma: %s)" % (nodo_padre.name, valor, suma))
+    for hijo in nodo_padre.children:
+        validar_suma_hijos(hijo, ambiente, column_name)
+def obtener_arbol(ambiente: pandas.DataFrame):
+    root = Node('0')
+    nodes = {}
+    nodes['0'] = root
+    for index_codigo_cuenta, row in ambiente.iterrows():
+        cuenta_padre = row['cu_cuenta_padre']
+        new_node = Node(index_codigo_cuenta, parent = nodes[cuenta_padre])
+        nodes[index_codigo_cuenta] = new_node
+    return root
+
+def imprimir_arbol(ambiente, root, columna_valor = ''):
+    for pre, _, node in RenderTree(root):
+        if node.name == '0':
+            nombre_cuenta = ''
+        else:
+            nombre_cuenta = ambiente.at[node.name, 'cu_nombre']
+        if (columna_valor != '') & (node.name != '0'):
+            valor = ambiente.at[node.name, columna_valor]
+        else:
+            valor = ''
+        print("%s%s %s %s" % (pre, node.name, nombre_cuenta, valor))
 
 def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
     print ('Cargando montos netos de movimientos ...')

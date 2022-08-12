@@ -54,10 +54,23 @@ def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = F
     root = obtener_arbol(ambiente)
     if imprimir:
         imprimir_arbol(ambiente, root, column_name)
-    result = True
+
+    valor_activos = ambiente.at['1', column_name]
+    valor_pasivos = ambiente.at['2', column_name]
+    valor_patrimonio = ambiente.at['3', column_name]
+    diferencia = valor_activos + valor_pasivos + valor_patrimonio   # pasivo y patrimonio ya tienen signo
+                                                                    # contrario a activos
+    if abs(diferencia) > 0.01:
+        escenario_ok = False
+        print("No cuadra acitvo = pasivo + patrimonio.")
+        print("Activos: %s" % (valor_activos))
+        print("Pasivos: %s" % (valor_pasivos))
+        print("Patrimonio: %s" % (valor_patrimonio))
+        print("Diferencia: %s" % (diferencia))
+
     for node in root.children:
-        result = validar_suma_hijos(node, ambiente, column_name=column_name)
-    return result
+        escenario_ok = validar_suma_hijos(node, ambiente, column_name=column_name)
+    return escenario_ok
 
 def validar_suma_hijos(nodo_padre: anytree.Node, ambiente: pandas.DataFrame, column_name:str):
     if len(nodo_padre.children) == 0:

@@ -67,9 +67,9 @@ def validar_suma_hijos(nodo_padre: anytree.Node, ambiente: pandas.DataFrame, col
     suma = 0
     for hijo in nodo_padre.children:
         suma += ambiente.at[hijo.name, column_name]
-    diferencia = abs(suma - valor)
-    if diferencia > 0.01:
-        print("No coincide suma de %s (valor: %s, suma: %s)" % (nodo_padre.name, valor, suma))
+    diferencia = suma - valor
+    if abs(diferencia) > 0.01:
+        print("No coincide suma de %s (valor: %s, suma: %s, dif: %s)" % (nodo_padre.name, valor, suma, diferencia))
     for hijo in nodo_padre.children:
         validar_suma_hijos(hijo, ambiente, column_name)
 def obtener_arbol(ambiente: pandas.DataFrame):

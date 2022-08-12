@@ -1,13 +1,13 @@
 import pandas
 
-def abrir_plan_cuentas():
-    df = pandas.read_excel('input/plan_cuentas_concretus.xlsx')
+def abrir_plan_cuentas(path_plan_de_cuentas: str):
+    df = pandas.read_excel(path_plan_de_cuentas)
     return df
 
-def nuevo_ambiente():
+def nuevo_ambiente(path_plan_de_cuentas: str):
     print ('Creando ambiente ...')
 
-    df = abrir_plan_cuentas()
+    df = abrir_plan_cuentas(path_plan_de_cuentas)
     df['cu_codigo'] = df['cu_codigo'].astype(str)
     FORMAT = ['cu_codigo', 'cu_nombre', 'cu_nivel', 'cu_cuenta_padre']
     result = df[FORMAT].set_index('cu_codigo')

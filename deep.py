@@ -25,6 +25,9 @@ def validar_arbol(ambiente: pandas.DataFrame):
         if ((cuenta_padre != '0') & (cuenta_padre not in ambiente.index)):
             resultado = False
             print("Falta cuenta padre de ", index_codigo_cuenta, row['cu_nombre'], cuenta_padre)
+        if (cuenta_padre != '0') & (not index_codigo_cuenta.startswith(cuenta_padre)):
+            resultado = False
+            print("Código de cuenta %s con cuenta padre %s" % (index_codigo_cuenta, cuenta_padre))
     return arbol_ok
 
 def cargar_escenario(ambiente: pandas.DataFrame, filename: str):

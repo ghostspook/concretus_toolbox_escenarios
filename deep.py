@@ -50,8 +50,15 @@ def cargar_escenario(ambiente: pandas.DataFrame, filename: str):
     imprimir_columnas(resultado)
     return resultado
 
+def cambiar_signo(ambiente: pandas.DataFrame, column_name: str, prefijo_cuentas_a_cambiar: str):
+    resultado = ambiente.copy()
+    for index_codigo_cuenta, row in resultado.iterrows():
+        if index_codigo_cuenta.startswith(prefijo_cuentas_a_cambiar):
+            resultado.at[index_codigo_cuenta, column_name] = - row[column_name]
+    return resultado
+
 def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = False):
-    print("Validando escenario")
+    print("Validando escenario %s..." % (column_name))
     escenario_ok = True
 
     root = obtener_arbol(ambiente)
@@ -69,7 +76,17 @@ def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = F
         print("Activos: %s" % (valor_activos))
         print("Pasivos: %s" % (valor_pasivos))
         print("Patrimonio: %s" % (valor_patrimonio))
-        print("Diferencia: %s" % (diferencia))
+        print("Diferencia: %s \n" % (diferencia))
+
+    valor_utilidadd = ambiente.at['49', column_name]
+    valor_resultados = ambiente.at['3701', column_name]
+    diferencia = valor_utilidadd + valor_resultados # [3701] tiene signo opuesto a utilidad
+    if abs(diferencia) > 0.01:
+        escenario_ok = False
+        print("No coinciden [49] Utilidad y [3701] Resultado.")
+        print("Utilidad: %s" % (valor_utilidadd))
+        print("Resultados: %s" % (valor_resultados))
+        print("Diferencia: %s \n" % (diferencia))
 
     for node in root.children:
         escenario_ok = validar_suma_hijos(node, ambiente, column_name=column_name)
@@ -132,11 +149,13 @@ def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
             actualizar_monto_recursivamente(resultado, index_codigo_cuenta, new_column_name, saldo)
         else:
             print ('Código no consta en el plan de cuentas', index_codigo_cuenta, '. Monto: ', saldo)
+    resultado = cambiar_signo(resultado, new_column_name, "4")
+    resultado = cambiar_signo(resultado, new_column_name, "5")
     total_ingresos = resultado.at['4', new_column_name] # (-)
     total_gastos = resultado.at['5', new_column_name] # (+)
     utilidad = total_ingresos + total_gastos
     resultado.at['49', new_column_name] = utilidad
-    actualizar_monto_recursivamente(resultado, '3701', new_column_name, utilidad)
+    actualizar_monto_recursivamente(resultado, '3701', new_column_name, -utilidad)
     imprimir_columnas(resultado)
     return resultado
 
@@ -147,20 +166,25 @@ def actualizar_monto_recursivamente(resultado, codigo_cuenta, columna_montos, nu
     if ((codigo_cuenta_padre != '0') & (codigo_cuenta_padre != '')):
         actualizar_monto_recursivamente(resultado, codigo_cuenta_padre, columna_montos, nuevo_saldo)
 
-def computar_acumulado(ambiente: pandas.DataFrame, columna_escenario_inicial: str, columna_neto_movimientos: str, columna_resultado: str):
+def computar_acumulado(ambiente: pandas.DataFrame, columna_escenario_inicial: str, columna_neto_movimientos: str, columna_resultado: str, acumular_resultados_ejercicio_anterior = False):
     print ('Calculando resultado acumulado ...')
 
     resultado = ambiente.copy()
     resultado[columna_resultado] = 0
+    resultados_ejercicio_anterior = resultado.at['3701', columna_escenario_inicial]
+
     for index_codigo_cuenta, row in resultado.iterrows():
         valor_escenario_inicial = row[columna_escenario_inicial]
         neto_movimientos = row[columna_neto_movimientos]
-        if ((index_codigo_cuenta[0] == '4') | (index_codigo_cuenta[0] == '5')):
-            resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial - neto_movimientos
-        else:
-            resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos
+        resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos
+
+    if acumular_resultados_ejercicio_anterior:
+        actualizar_monto_recursivamente(resultado, '3601', columna_resultado, resultados_ejercicio_anterior)
+        actualizar_monto_recursivamente(resultado, '3701', columna_resultado, - resultados_ejercicio_anterior)
+
     imprimir_columnas(resultado)
     return resultado
+
 def imprimir_columnas(df: pandas.DataFrame):
     print("Columnas:")
     for col in df.columns:

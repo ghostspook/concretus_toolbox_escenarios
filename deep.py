@@ -190,3 +190,14 @@ def imprimir_columnas(df: pandas.DataFrame):
     for col in df.columns:
         print('- ', col)
     print("\n")
+
+def minimizar(ambiente: pandas.DataFrame):
+    resultado = ambiente.copy()
+    for index_codigo_cuenta, row in ambiente.iterrows():
+        eliminar_linea = True
+        for col in ambiente.columns:
+            if (col != 'cu_nombre') & (col != 'cu_nivel') & (col != 'cu_cuenta_padre') & (ambiente.at[index_codigo_cuenta, col] != 0):
+                eliminar_linea = False
+        if eliminar_linea:
+            resultado = resultado.drop(index_codigo_cuenta)
+    return resultado

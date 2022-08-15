@@ -181,6 +181,7 @@ def computar_acumulado(ambiente: pandas.DataFrame, columna_escenario_inicial: st
     if acumular_resultados_ejercicio_anterior:
         actualizar_monto_recursivamente(resultado, '3601', columna_resultado, resultados_ejercicio_anterior)
         actualizar_monto_recursivamente(resultado, '3701', columna_resultado, - resultados_ejercicio_anterior)
+        resultado.at['49', columna_resultado] += resultados_ejercicio_anterior
 
     imprimir_columnas(resultado)
     return resultado

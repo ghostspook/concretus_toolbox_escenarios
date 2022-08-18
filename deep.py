@@ -176,12 +176,14 @@ def computar_acumulado(ambiente: pandas.DataFrame, columna_escenario_inicial: st
     for index_codigo_cuenta, row in resultado.iterrows():
         valor_escenario_inicial = row[columna_escenario_inicial]
         neto_movimientos = row[columna_neto_movimientos]
-        resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos
+        if acumular_resultados_ejercicio_anterior & (index_codigo_cuenta.startswith('4')) | (index_codigo_cuenta.startswith('5')):
+            resultado.at[index_codigo_cuenta, columna_resultado] = neto_movimientos
+        else:
+            resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos
 
     if acumular_resultados_ejercicio_anterior:
         actualizar_monto_recursivamente(resultado, '3601', columna_resultado, resultados_ejercicio_anterior)
         actualizar_monto_recursivamente(resultado, '3701', columna_resultado, - resultados_ejercicio_anterior)
-        resultado.at['49', columna_resultado] += resultados_ejercicio_anterior
 
     imprimir_columnas(resultado)
     return resultado
@@ -196,10 +198,7 @@ def computar_reverso_acumulado(ambiente: pandas.DataFrame, columna_escenario_ini
     for index_codigo_cuenta, row in resultado.iterrows():
         valor_escenario_inicial = row[columna_escenario_inicial]
         neto_movimientos = row[columna_neto_movimientos]
-        if (index_codigo_cuenta.startswith('4')) | (index_codigo_cuenta.startswith('5')):
-            resultado.at[index_codigo_cuenta, columna_resultado] = neto_movimientos
-        else:
-            resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial - neto_movimientos
+        resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial - neto_movimientos
 
     if acumular_resultados_ejercicio_anterior:
         actualizar_monto_recursivamente(resultado, '3601', columna_resultado, resultados_ejercicio_anterior)

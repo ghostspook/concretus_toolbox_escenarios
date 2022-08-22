@@ -176,7 +176,7 @@ def computar_acumulado(ambiente: pandas.DataFrame, columna_escenario_inicial: st
     for index_codigo_cuenta, row in resultado.iterrows():
         valor_escenario_inicial = row[columna_escenario_inicial]
         neto_movimientos = row[columna_neto_movimientos]
-        if acumular_resultados_ejercicio_anterior & (index_codigo_cuenta.startswith('4')) | (index_codigo_cuenta.startswith('5')):
+        if acumular_resultados_ejercicio_anterior & ((index_codigo_cuenta.startswith('4')) | (index_codigo_cuenta.startswith('5'))):
             resultado.at[index_codigo_cuenta, columna_resultado] = neto_movimientos
         else:
             resultado.at[index_codigo_cuenta, columna_resultado] = valor_escenario_inicial + neto_movimientos

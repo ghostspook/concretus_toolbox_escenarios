@@ -28,6 +28,17 @@ def validar_arbol(ambiente: pandas.DataFrame):
         if (cuenta_padre != '0') & (not index_codigo_cuenta.startswith(cuenta_padre)):
             resultado = False
             print("Código de cuenta %s con cuenta padre %s" % (index_codigo_cuenta, cuenta_padre))
+
+    root = obtener_arbol(ambiente)
+    for pre, _, node in RenderTree(root):
+        if node.name != '0':
+            nivel_cuenta = ambiente.at[node.name, 'cu_nivel']
+            nivel_correcto = node.depth - 1 if node.depth >= 2 else node.depth
+            if nivel_correcto != nivel_cuenta:
+                resultado = False
+                nombre_cuenta = ambiente.at[node.name, 'cu_nombre']
+                print("Nivel incorrecto en cuenta %s %s (%s, correcto: %s)" % (node.name, nombre_cuenta, nivel_cuenta, nivel_correcto))
+
     return arbol_ok
 
 def cargar_escenario(ambiente: pandas.DataFrame, filename: str):
@@ -116,24 +127,17 @@ def obtener_arbol(ambiente: pandas.DataFrame):
     return root
 
 def imprimir_arbol(ambiente, root, columna_valor = ''):
-    mensajes = []
     for pre, _, node in RenderTree(root):
         if node.name == '0':
             nombre_cuenta = ''
-            nivel_cuenta = ''
         else:
             nombre_cuenta = ambiente.at[node.name, 'cu_nombre']
-            nivel_cuenta = ambiente.at[node.name, 'cu_nivel']
         if (columna_valor != '') & (node.name != '0'):
             valor = ambiente.at[node.name, columna_valor]
         else:
             valor = ''
-        nivel_correcto = node.depth - 1 if node.depth >= 2 else node.depth
-        print("%s%s %s (%s, %s) %s" % (pre, node.name, nombre_cuenta, nivel_cuenta, nivel_correcto, valor))
-        if nivel_correcto != nivel_cuenta:
-            mensajes.append("Error en cuenta " + node.name + " " +  nombre_cuenta + " (" + str(nivel_cuenta) + "; " + str(nivel_correcto) + ")")
-    if len(mensajes) > 0:
-        print(mensajes)
+        print("%s%s %s %s" % (pre, node.name, nombre_cuenta, valor))
+
 def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
     print ('Cargando montos netos de movimientos ...')
 

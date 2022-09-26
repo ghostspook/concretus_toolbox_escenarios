@@ -23,10 +23,10 @@ def validar_arbol(ambiente: pandas.DataFrame):
     for index_codigo_cuenta, row in ambiente.iterrows():
         cuenta_padre = row['cu_cuenta_padre']
         if ((cuenta_padre != '0') & (cuenta_padre not in ambiente.index)):
-            resultado = False
+            arbol_ok = False
             print("Falta cuenta padre de ", index_codigo_cuenta, row['cu_nombre'], cuenta_padre)
         if (cuenta_padre != '0') & (not index_codigo_cuenta.startswith(cuenta_padre)):
-            resultado = False
+            arbol_ok = False
             print("Código de cuenta %s con cuenta padre %s" % (index_codigo_cuenta, cuenta_padre))
 
     root = obtener_arbol(ambiente)
@@ -35,7 +35,7 @@ def validar_arbol(ambiente: pandas.DataFrame):
             nivel_cuenta = ambiente.at[node.name, 'cu_nivel']
             nivel_correcto = node.depth - 1 if node.depth >= 2 else node.depth
             if nivel_correcto != nivel_cuenta:
-                resultado = False
+                arbol_ok = False
                 nombre_cuenta = ambiente.at[node.name, 'cu_nombre']
                 print("Nivel incorrecto en cuenta %s %s (%s, correcto: %s)" % (node.name, nombre_cuenta, nivel_cuenta, nivel_correcto))
 
@@ -74,7 +74,7 @@ def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = F
 
     root = obtener_arbol(ambiente)
     if imprimir:
-        imprimir_arbol(ambiente, root, column_name)
+        imprimir_arbol(ambiente, column_name)
 
     valor_activos = ambiente.at['1', column_name]
     valor_pasivos = ambiente.at['2', column_name]
@@ -126,7 +126,8 @@ def obtener_arbol(ambiente: pandas.DataFrame):
         nodes[index_codigo_cuenta] = new_node
     return root
 
-def imprimir_arbol(ambiente, root, columna_valor = ''):
+def imprimir_arbol(ambiente, columna_valor = ''):
+    root = obtener_arbol(ambiente)
     for pre, _, node in RenderTree(root):
         if node.name == '0':
             nombre_cuenta = ''

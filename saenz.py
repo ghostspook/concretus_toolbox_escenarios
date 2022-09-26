@@ -72,7 +72,16 @@ ambiente = deep.computar_acumulado(ambiente, 'SAENZ_MARZO_2022', 'SAENZ_ABRIL_20
 # Mayo 2022
 ambiente = deep.cargar_netos_movimientos(ambiente, 'input/SAENZ_MAYO_2022 (delta).xlsx')
 ambiente = deep.computar_acumulado(ambiente, 'SAENZ_ABRIL_2022', 'SAENZ_MAYO_2022 (delta)', 'SAENZ_MAYO_2022')
-deep.validar_escenario(ambiente, 'SAENZ_MAYO_2022', imprimir=True)
+
+# Junio 2022
+ambiente = deep.cargar_netos_movimientos(ambiente, 'input/SAENZ_JUNIO_2022 (delta).xlsx')
+ambiente = deep.computar_acumulado(ambiente, 'SAENZ_MAYO_2022', 'SAENZ_JUNIO_2022 (delta)', 'SAENZ_JUNIO_2022')
+
+# Julio 2022
+ambiente = deep.cargar_netos_movimientos(ambiente, 'input/SAENZ_JULIO_2022 (delta).xlsx')
+ambiente = deep.computar_acumulado(ambiente, 'SAENZ_JUNIO_2022', 'SAENZ_JULIO_2022 (delta)', 'SAENZ_JULIO_2022')
+
+deep.validar_escenario(ambiente, 'SAENZ_JULIO_2022', imprimir=True)
 
 # ambiente = deep.minimizar(ambiente)
 # ambiente.to_excel("output/SAENZ_ENE_2021_JUL_2022.xlsx")

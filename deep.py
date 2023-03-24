@@ -79,8 +79,8 @@ def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = F
     valor_activos = ambiente.at['1', column_name]
     valor_pasivos = ambiente.at['2', column_name]
     valor_patrimonio = ambiente.at['3', column_name]
-    diferencia = valor_activos + valor_pasivos + valor_patrimonio   # pasivo y patrimonio ya tienen signo
-                                                                    # contrario a activos
+    diferencia = valor_activos - valor_pasivos - valor_patrimonio
+
     if abs(diferencia) > 0.01:
         escenario_ok = False
         print("No cuadra acitvo = pasivo + patrimonio.")
@@ -91,7 +91,7 @@ def validar_escenario(ambiente: pandas.DataFrame, column_name: str, imprimir = F
 
     valor_utilidadd = ambiente.at['49', column_name]
     valor_resultados = ambiente.at['3701', column_name]
-    diferencia = valor_utilidadd + valor_resultados # [3701] tiene signo opuesto a utilidad
+    diferencia = valor_utilidadd - valor_resultados
     if abs(diferencia) > 0.01:
         escenario_ok = False
         print("No coinciden [49] Utilidad y [3701] Resultado.")
@@ -161,13 +161,13 @@ def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
             actualizar_monto_recursivamente(resultado, index_codigo_cuenta, new_column_name, saldo)
         else:
             print ('Código no consta en el plan de cuentas', index_codigo_cuenta, '. Monto: ', saldo)
+    resultado = cambiar_signo(resultado, new_column_name, "2")
     resultado = cambiar_signo(resultado, new_column_name, "4")
-    resultado = cambiar_signo(resultado, new_column_name, "5")
-    total_ingresos = resultado.at['4', new_column_name] # (-)
-    total_gastos = resultado.at['5', new_column_name] # (+)
-    utilidad = total_ingresos + total_gastos
+    total_ingresos = resultado.at['4', new_column_name]
+    total_gastos = resultado.at['5', new_column_name]
+    utilidad = total_ingresos - total_gastos
     resultado.at['49', new_column_name] = utilidad
-    actualizar_monto_recursivamente(resultado, '3701', new_column_name, -utilidad)
+    actualizar_monto_recursivamente(resultado, '3701', new_column_name, utilidad)
     imprimir_columnas(resultado)
     return resultado
 

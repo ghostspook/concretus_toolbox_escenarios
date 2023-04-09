@@ -139,10 +139,24 @@ def imprimir_arbol(ambiente, columna_valor = ''):
             valor = ''
         print("%s%s %s %s" % (pre, node.name, nombre_cuenta, valor))
 
-def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str):
+def cargar_multiples_netos(ambiente: pandas.DataFrame, filename: str):
+    xl = pandas.ExcelFile(filename)
+    sheet_names = xl.sheet_names
+
+    nuevo_ambiente = ambiente.copy()
+
+    for sheet in sheet_names:
+        nuevo_ambiente = cargar_netos_movimientos(nuevo_ambiente, filename, sheet)
+
+    return nuevo_ambiente
+def cargar_netos_movimientos(ambiente: pandas.DataFrame, filename: str, sheet: str = ''):
     print ('Cargando montos netos de movimientos ...')
 
-    df = pandas.read_excel(filename)
+    if sheet == '':
+        df = pandas.read_excel(filename)
+    else:
+        df = pandas.read_excel(filename, sheet_name=sheet)
+
     columna_codigo_cuenta = df.keys()[0]
     df[columna_codigo_cuenta] = df[columna_codigo_cuenta].astype(str)
     df = df.set_index(columna_codigo_cuenta)
